@@ -1,0 +1,20 @@
+option_settings:
+
+  # elb timeout 
+  - namespace: aws:elb:policies
+    option_name: ConnectionSettingIdleTimeout
+    value: 600
+    
+    
+ files:
+    "/etc/httpd/conf.d/apache-custom.conf":
+        mode: "000644"
+        owner: root
+        group: root
+        content: |
+            KeepAlive On
+            KeepAliveTimeout 600
+            Timeout 600
+            AcceptFilter http none
+            AcceptFilter http none
+            MaxKeepAliveRequests 600
