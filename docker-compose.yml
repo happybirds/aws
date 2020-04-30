@@ -1,0 +1,44 @@
+version: '3'
+volumes:
+  db:
+  gems:
+  redis:
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis:/data
+
+  app:
+    build: .
+    command: bundle exec rails s -b 0.0.0.0
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/usr/src/app:cached
+      - gems:/usr/local/bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+
+  sidekiq:
+    build: .
+    command: sidekiq -C config/sidekiq.yml -L log/sidekiq.log
+    volumes:
+      - .:/usr/src/app:cached
+      - gems:/usr/local/bundle
+    depends_on:
+      - db
+      - redis
